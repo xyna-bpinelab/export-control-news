@@ -113,7 +113,10 @@ export async function GET(req: Request) {
       status: 'collected',
     }))
 
-    const { error } = await supabase.from('articles').insert(rows)
+    const { error } = await supabase.from('articles').upsert(rows, {
+      onConflict: 'url_hash',
+      ignoreDuplicates: true,
+    })
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
