@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 * * * *'   # 毎時 :00 — 収集
     - cron: '15 * * * *'  # 毎時 :15 — AI要約
+    - cron: '45 * * * *'  # 毎時 :45 — AI要約（30分ごと）
   workflow_dispatch:
     inputs:
       job:
@@ -30,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'summarize' || github.event.inputs.job == 'both') ||
-      github.event_name == 'schedule' && startsWith(github.event.schedule, '15 ')
+      github.event_name == 'schedule' && (startsWith(github.event.schedule, '15 ') || startsWith(github.event.schedule, '45 '))
     steps:
       - name: Call /api/cron/summarize
         run: |

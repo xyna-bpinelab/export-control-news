@@ -31,6 +31,8 @@ export async function generateSummary(article: Article): Promise<SummaryResult &
     model: MODEL,
     generationConfig: { maxOutputTokens: MAX_TOKENS },
   })
+  // Gemini 無料枠: 15回/分 → 4秒間隔で制限内に収める
+  await new Promise((resolve) => setTimeout(resolve, 4000))
   const response = await model.generateContent(prompt)
   const rawText = response.response.text()
 
