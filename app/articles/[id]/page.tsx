@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!data) return {}
 
-  const title = (data as Article).title_ja ?? (data as Article).title
-  const description = (data as Article).summaries?.summary_ja?.slice(0, 160)
+  const title = (data as unknown as Article).title_ja ?? (data as unknown as Article).title
+  const description = (data as unknown as { summaries?: { summary_ja?: string } }).summaries?.summary_ja?.slice(0, 160)
 
   return { title, description }
 }
