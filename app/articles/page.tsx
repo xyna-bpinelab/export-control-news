@@ -25,10 +25,26 @@ export default async function ArticlesPage({ searchParams }: Props) {
 
   const supabase = await createServerSupabaseClient()
 
+  // 機関フィルター: slug → source_id に変換
+  let sourceId: string | undefined
+  if (params.source) {
+    const { data: src } = await supabase
+      .from('sources')
+      .select('id')
+      .eq('slug', params.source)
+      .single()
+    sourceId = src?.id
+  }
+
+  // 重要度フィルターがある場合は summaries を INNER JOIN して絞り込む
+  const summaryJoin = params.impact
+    ? 'summaries!inner(summary_ja, key_points, impact_level, related_laws)'
+    : 'summaries(summary_ja, key_points, impact_level, related_laws)'
+
   let query = supabase
     .from('articles')
     .select(
-      '*, sources(id, slug, name_ja, country_code), summaries(summary_ja, key_points, impact_level, related_laws)',
+      `*, sources(id, slug, name_ja, country_code), ${summaryJoin}`,
       { count: 'exact' },
     )
     .in('status', ['collected', 'summarizing', 'summarized'])
@@ -37,6 +53,8 @@ export default async function ArticlesPage({ searchParams }: Props) {
 
   if (params.q) query = query.ilike('title', `%${params.q}%`)
   if (params.category) query = query.eq('category', params.category)
+  if (sourceId) query = query.eq('source_id', sourceId)
+  if (params.impact) query = query.eq('summaries.impact_level', params.impact)
 
   const { data, count } = await query
   const articles = (data ?? []) as Article[]
