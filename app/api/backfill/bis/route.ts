@@ -30,6 +30,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  try {
+
   const { searchParams } = new URL(req.url)
   const page = parseInt(searchParams.get('page') ?? '1', 10)
 
@@ -104,12 +106,16 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({
-    ok: true,
-    page,
-    total_pages: data.total_pages,
-    found: items.length,
-    inserted: newItems.length,
-    has_more: page < data.total_pages,
-  })
+    return NextResponse.json({
+      ok: true,
+      page,
+      total_pages: data.total_pages,
+      found: items.length,
+      inserted: newItems.length,
+      has_more: page < data.total_pages,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }
