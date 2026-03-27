@@ -48,12 +48,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'BIS source not found' }, { status: 500 })
   }
 
-  // Federal Register API でページ取得（配列パラメータは手動で組み立て）
+  // Federal Register API でページ取得
   const qs = [
     'conditions%5Bagencies%5D%5B%5D=industry-and-security-bureau',
-    'conditions%5Btype%5D%5B%5D=Rule',
-    'conditions%5Btype%5D%5B%5D=Proposed+Rule',
-    'conditions%5Btype%5D%5B%5D=Notice',
     `per_page=${PER_PAGE}`,
     `page=${page}`,
     'order=newest',
@@ -61,7 +58,6 @@ export async function GET(req: Request) {
     'fields%5B%5D=html_url',
     'fields%5B%5D=publication_date',
     'fields%5B%5D=abstract',
-    'fields%5B%5D=document_number',
   ].join('&')
 
   const res = await fetch(`${FEDERAL_REGISTER_API}?${qs}`, {
