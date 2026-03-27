@@ -31,7 +31,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
       '*, sources(id, slug, name_ja, country_code), summaries(summary_ja, key_points, impact_level, related_laws)',
       { count: 'exact' },
     )
-    .eq('status', 'summarized')
+    .in('status', ['collected', 'summarizing', 'summarized'])
     .order('published_at', { ascending: false, nullsFirst: false })
     .range(offset, offset + ITEMS_PER_PAGE - 1)
 

@@ -12,7 +12,7 @@ export async function GET() {
   const { data } = await supabase
     .from('articles')
     .select('*, sources(name_ja), summaries(summary_ja, impact_level)')
-    .eq('status', 'summarized')
+    .in('status', ['collected', 'summarizing', 'summarized'])
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(50)
 

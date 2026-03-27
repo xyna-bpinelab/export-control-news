@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       `*, sources(id, slug, name_ja, country_code), summaries(summary_ja, key_points, impact_level, related_laws)`,
       { count: 'exact' },
     )
-    .eq('status', 'summarized')
+    .in('status', ['collected', 'summarizing', 'summarized'])
     .order('published_at', { ascending: false, nullsFirst: false })
     .range(offset, offset + limit - 1)
 

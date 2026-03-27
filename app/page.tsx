@@ -9,7 +9,7 @@ async function getTopArticles(): Promise<Article[]> {
   const { data } = await supabase
     .from('articles')
     .select('*, sources(id, slug, name_ja, country_code), summaries(summary_ja, key_points, impact_level, related_laws)')
-    .eq('status', 'summarized')
+    .in('status', ['collected', 'summarizing', 'summarized'])
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(20)
 
