@@ -5,7 +5,7 @@ import { truncateForLLM } from '@/lib/utils/text'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
 
-const MODEL = process.env.GEMINI_MODEL ?? 'gemini-1.5-flash'
+const MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash-lite'
 const MAX_TOKENS = 1024
 
 /**
@@ -27,10 +27,10 @@ export async function generateSummary(article: Article): Promise<SummaryResult &
 
   const prompt = buildSummarizePrompt(truncatedArticle)
 
-  const model = genAI.getGenerativeModel(
-    { model: MODEL, generationConfig: { maxOutputTokens: MAX_TOKENS } },
-    { apiVersion: 'v1' },
-  )
+  const model = genAI.getGenerativeModel({
+    model: MODEL,
+    generationConfig: { maxOutputTokens: MAX_TOKENS },
+  })
   // Gemini 無料枠: 15回/分 → 4秒間隔で制限内に収める
   await new Promise((resolve) => setTimeout(resolve, 4000))
   const response = await model.generateContent(prompt)
