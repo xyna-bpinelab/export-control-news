@@ -3,9 +3,7 @@ import type { Article, SummaryResult, ImpactLevel } from '@/types'
 import { buildSummarizePrompt, PROMPT_VERSION } from './prompts'
 import { truncateForLLM } from '@/lib/utils/text'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '', {
-  apiVersion: 'v1',
-})
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
 
 const MODEL = process.env.GEMINI_MODEL ?? 'gemini-1.5-flash'
 const MAX_TOKENS = 1024
@@ -29,10 +27,10 @@ export async function generateSummary(article: Article): Promise<SummaryResult &
 
   const prompt = buildSummarizePrompt(truncatedArticle)
 
-  const model = genAI.getGenerativeModel({
-    model: MODEL,
-    generationConfig: { maxOutputTokens: MAX_TOKENS },
-  })
+  const model = genAI.getGenerativeModel(
+    { model: MODEL, generationConfig: { maxOutputTokens: MAX_TOKENS } },
+    { apiVersion: 'v1' },
+  )
   // Gemini 無料枠: 15回/分 → 4秒間隔で制限内に収める
   await new Promise((resolve) => setTimeout(resolve, 4000))
   const response = await model.generateContent(prompt)
