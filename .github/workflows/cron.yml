@@ -1,0 +1,39 @@
+name: Hourly Cron Jobs
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # 毎時 :00 — 収集
+    - cron: '15 * * * *'  # 毎時 :15 — AI要約
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job to run (collect / summarize / both)'
+        required: false
+        default: 'both'
+
+jobs:
+  collect:
+    name: Collect News
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'collect' || github.event.inputs.job == 'both') ||
+      github.event_name == 'schedule' && startsWith(github.event.schedule, '0 ')
+    steps:
+      - name: Call /api/cron/collect
+        run: |
+          curl -f -X GET "${{ secrets.VERCEL_URL }}/api/cron/collect" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 60
+
+  summarize:
+    name: Summarize Articles
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'summarize' || github.event.inputs.job == 'both') ||
+      github.event_name == 'schedule' && startsWith(github.event.schedule, '15 ')
+    steps:
+      - name: Call /api/cron/summarize
+        run: |
+          curl -f -X GET "${{ secrets.VERCEL_URL }}/api/cron/summarize" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 60

@@ -1,13 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Article, SummaryResult, ImpactLevel } from '@/types'
 import { buildSummarizePrompt, PROMPT_VERSION } from './prompts'
 import { truncateForLLM } from '@/lib/utils/text'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
 
-const MODEL = process.env.CLAUDE_MODEL ?? 'claude-haiku-4-5-20251001'
+const MODEL = process.env.GEMINI_MODEL ?? 'gemini-1.5-flash'
 const MAX_TOKENS = 1024
 
 /**
@@ -29,21 +27,17 @@ export async function generateSummary(article: Article): Promise<SummaryResult &
 
   const prompt = buildSummarizePrompt(truncatedArticle)
 
-  const response = await anthropic.messages.create({
+  const model = genAI.getGenerativeModel({
     model: MODEL,
-    max_tokens: MAX_TOKENS,
-    messages: [{ role: 'user', content: prompt }],
+    generationConfig: { maxOutputTokens: MAX_TOKENS },
   })
-
-  const rawText = response.content
-    .filter((block) => block.type === 'text')
-    .map((block) => (block as { type: 'text'; text: string }).text)
-    .join('')
+  const response = await model.generateContent(prompt)
+  const rawText = response.response.text()
 
   // JSON パース
   const jsonMatch = rawText.match(/\{[\s\S]*\}/)
   if (!jsonMatch) {
-    throw new Error(`Claude returned non-JSON: ${rawText.slice(0, 200)}`)
+    throw new Error(`Gemini returned non-JSON: ${rawText.slice(0, 200)}`)
   }
 
   let parsed: {
@@ -65,14 +59,15 @@ export async function generateSummary(article: Article): Promise<SummaryResult &
       ? (parsed.impact_level as ImpactLevel)
       : 'low'
 
+  const usageMeta = response.response.usageMetadata
   return {
     summary_ja: parsed.summary_ja ?? '要約を取得できませんでした。',
     title_ja: parsed.title_ja ?? undefined,
     key_points: (parsed.key_points ?? []).filter((p): p is string => typeof p === 'string'),
     impact_level,
     related_laws: (parsed.related_laws ?? []).filter((l): l is string => typeof l === 'string'),
-    tokens_input: response.usage.input_tokens,
-    tokens_output: response.usage.output_tokens,
+    tokens_input: usageMeta?.promptTokenCount ?? 0,
+    tokens_output: usageMeta?.candidatesTokenCount ?? 0,
     model_used: MODEL,
     prompt_version: PROMPT_VERSION,
   }
