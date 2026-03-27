@@ -29,8 +29,9 @@ jobs:
           page=1
           while true; do
             echo "Fetching BIS page $page..."
-            response=$(curl -sf -X GET "${VERCEL_URL}/api/backfill/bis?page=${page}" \
+            response=$(curl -sL -X GET "${VERCEL_URL}/api/backfill/bis?page=${page}" \
               -H "Authorization: Bearer ${CRON_SECRET}")
+            echo "Response: $response"
             echo "$response"
             has_more=$(echo "$response" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('has_more','false'))")
             inserted=$(echo "$response" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('inserted',0))")
@@ -59,8 +60,9 @@ jobs:
           count=0
           while true; do
             echo "Fetching OFAC page $page..."
-            response=$(curl -sf -X GET "${VERCEL_URL}/api/backfill/ofac?page=${page}" \
+            response=$(curl -sL -X GET "${VERCEL_URL}/api/backfill/ofac?page=${page}" \
               -H "Authorization: Bearer ${CRON_SECRET}")
+            echo "Response: $response"
             echo "$response"
             has_more=$(echo "$response" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('has_more','false'))")
             inserted=$(echo "$response" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('inserted',0))")
