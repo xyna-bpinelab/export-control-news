@@ -46,20 +46,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'BIS source not found' }, { status: 500 })
   }
 
-  // Federal Register API でページ取得
-  const params = new URLSearchParams({
-    'conditions[agencies][]': 'industry-and-security-bureau',
-    'conditions[type][]': 'Rule',
-    per_page: String(PER_PAGE),
-    page: String(page),
-    order: 'newest',
-    'fields[]': 'title,html_url,publication_date,abstract,document_number,type',
-  })
-  // Notice と Proposed Rule も追加
-  params.append('conditions[type][]', 'Proposed Rule')
-  params.append('conditions[type][]', 'Notice')
+  // Federal Register API でページ取得（配列パラメータは手動で組み立て）
+  const qs = [
+    'conditions%5Bagencies%5D%5B%5D=industry-and-security-bureau',
+    'conditions%5Btype%5D%5B%5D=Rule',
+    'conditions%5Btype%5D%5B%5D=Proposed+Rule',
+    'conditions%5Btype%5D%5B%5D=Notice',
+    `per_page=${PER_PAGE}`,
+    `page=${page}`,
+    'order=newest',
+    'fields%5B%5D=title',
+    'fields%5B%5D=html_url',
+    'fields%5B%5D=publication_date',
+    'fields%5B%5D=abstract',
+    'fields%5B%5D=document_number',
+  ].join('&')
 
-  const res = await fetch(`${FEDERAL_REGISTER_API}?${params}`, {
+  const res = await fetch(`${FEDERAL_REGISTER_API}?${qs}`, {
     headers: { 'User-Agent': 'ExportControlNewsBot/1.0 (+https://export-control-news.vercel.app)' },
   })
 
