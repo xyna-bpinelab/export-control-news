@@ -11,7 +11,7 @@ async function getTopArticles(): Promise<Article[]> {
     .select('*, sources(id, slug, name_ja, country_code), summaries(summary_ja, key_points, impact_level, related_laws)')
     .in('status', ['collected', 'summarizing', 'summarized'])
     .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(20)
+    .limit(5)
 
   return (data ?? []) as Article[]
 }
@@ -30,99 +30,120 @@ async function getStats() {
   return { total: total ?? 0, highImpact: highImpact ?? 0 }
 }
 
+const FEATURES = [
+  {
+    href: '/classification',
+    icon: '🔍',
+    title: '該非判定',
+    description: '品名・仕様を入力し、外為法（別表第1）および米国EAR（ECCN）の規制対象品目に該当するか判定します。',
+    badge: null,
+    color: 'border-blue-200 hover:border-blue-400 hover:bg-blue-50',
+    labelColor: 'text-blue-600',
+  },
+  {
+    href: '/license',
+    icon: '📋',
+    title: '輸出許可判断',
+    description: '該非判定結果に仕向地・最終用途・需要者を加え、輸出許可申請が必要かどうかを判断します。',
+    badge: null,
+    color: 'border-purple-200 hover:border-purple-400 hover:bg-purple-50',
+    labelColor: 'text-purple-600',
+  },
+  {
+    href: '/screening',
+    icon: '🛡️',
+    title: '需要者スクリーニング',
+    description: '顧客名・所在地をもとに、外国ユーザーリスト・BIS・OFAC等の懸念リストとの照合を行います。',
+    badge: null,
+    color: 'border-orange-200 hover:border-orange-400 hover:bg-orange-50',
+    labelColor: 'text-orange-600',
+  },
+  {
+    href: '/articles',
+    icon: '📰',
+    title: '最新情報',
+    description: '経産省・外務省・BIS・OFAC等の政府機関から輸出管理の最新情報をAI要約付きで自動収集します。',
+    badge: '自動更新',
+    color: 'border-green-200 hover:border-green-400 hover:bg-green-50',
+    labelColor: 'text-green-600',
+  },
+]
+
 export default async function HomePage() {
   const [articles, stats] = await Promise.all([getTopArticles(), getStats()])
 
   return (
-    <div>
-      {/* ヒーローセクション */}
-      <div className="mb-8">
+    <div className="space-y-10">
+      {/* ヒーロー */}
+      <div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">輸出管理情報ポータル</h1>
-        <p className="text-gray-500 text-sm">
-          経済産業省・外務省・BIS・OFAC等の政府機関から最新の輸出管理情報をAI要約付きで自動収集します。
+        <p className="text-gray-500 text-sm max-w-2xl">
+          安全保障貿易管理（外為法・EAR）をAIでサポートします。
+          該非判定から需要者スクリーニングまで、輸出コンプライアンス業務を効率化します。
         </p>
-        <div className="mt-4 flex gap-4 text-sm">
-          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center">
+        <div className="mt-4 flex gap-3 text-sm">
+          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center min-w-[100px]">
             <div className="text-2xl font-bold text-gray-900">{stats.total.toLocaleString()}</div>
             <div className="text-gray-500 text-xs mt-1">収集記事数</div>
           </div>
-          <div className="bg-white rounded-lg border border-red-200 px-4 py-3 text-center">
+          <div className="bg-white rounded-lg border border-red-200 px-4 py-3 text-center min-w-[100px]">
             <div className="text-2xl font-bold text-red-600">{stats.highImpact.toLocaleString()}</div>
             <div className="text-gray-500 text-xs mt-1">要対応情報</div>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-8">
-        {/* メインコンテンツ */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">最新情報</h2>
-            <a href="/articles" className="text-sm text-blue-600 hover:underline">
-              すべて見る →
+      {/* 機能カード */}
+      <div>
+        <h2 className="text-base font-semibold text-gray-700 mb-4">機能メニュー</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {FEATURES.map((f) => (
+            <a
+              key={f.href}
+              href={f.href}
+              className={`group bg-white border rounded-xl p-5 transition-all duration-150 ${f.color}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{f.icon}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className={`font-semibold text-base ${f.labelColor}`}>{f.title}</span>
+                      {f.badge && (
+                        <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
+                          {f.badge}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <span className="text-gray-300 group-hover:text-gray-500 transition-colors text-lg shrink-0">→</span>
+              </div>
+              <p className="mt-3 text-xs text-gray-500 leading-relaxed">{f.description}</p>
             </a>
-          </div>
-
-          {articles.length === 0 ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400">
-              まだ記事がありません。収集が完了するまでお待ちください。
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {articles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
-          )}
+          ))}
         </div>
+      </div>
 
-        {/* サイドバー */}
-        <aside className="hidden lg:block w-64 shrink-0">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">収集元機関</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              {[
-                { flag: '🇯🇵', name: '経済産業省', slug: 'meti' },
-                { flag: '🇯🇵', name: '外務省', slug: 'mofa' },
-                { flag: '🇯🇵', name: 'CISTEC', slug: 'cistec' },
-                { flag: '🇺🇸', name: 'BIS', slug: 'bis' },
-                { flag: '🇺🇸', name: 'OFAC', slug: 'ofac' },
-                { flag: '🇪🇺', name: '欧州委員会', slug: 'eu-commission' },
-              ].map((s) => (
-                <li key={s.slug}>
-                  <a
-                    href={`/articles?source=${s.slug}`}
-                    className="flex items-center gap-2 hover:text-blue-600 transition-colors"
-                  >
-                    <span>{s.flag}</span>
-                    <span>{s.name}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+      {/* 最新情報 */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-gray-700">最新情報</h2>
+          <a href="/articles" className="text-sm text-blue-600 hover:underline">
+            すべて見る →
+          </a>
+        </div>
+        {articles.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400 text-sm">
+            まだ記事がありません。収集が完了するまでお待ちください。
           </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">カテゴリ</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              {[
-                { label: '制裁', value: 'sanction' },
-                { label: '規制', value: 'regulation' },
-                { label: 'ガイダンス', value: 'guidance' },
-                { label: 'アラート', value: 'alert' },
-              ].map((c) => (
-                <li key={c.value}>
-                  <a
-                    href={`/articles?category=${c.value}`}
-                    className="hover:text-blue-600 transition-colors"
-                  >
-                    {c.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+        ) : (
+          <div className="space-y-4">
+            {articles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
           </div>
-        </aside>
+        )}
       </div>
     </div>
   )
