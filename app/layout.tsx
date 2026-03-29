@@ -43,6 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/classification" className="hover:text-gray-900 transition-colors">
                 該非判定
               </a>
+              <a href="/license" className="hover:text-gray-900 transition-colors">
+                輸出許可判断
+              </a>
               <a href="/screening" className="hover:text-gray-900 transition-colors">
                 需要者スクリーニング
               </a>

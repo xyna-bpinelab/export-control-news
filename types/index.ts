@@ -129,6 +129,45 @@ export interface ClassificationResult {
   tokens_output: number
 }
 
+// ---- 許可判断機能 ----
+
+export type LicenseStatus = 'permit_required' | 'exception_applicable' | 'no_permit_required' | 'prohibited' | 'gray'
+
+export interface LicenseInput {
+  eccn: string               // ECCN or "EAR99"
+  japan_fefta_item: string   // "別表第1 第9項" or "非該当"
+  destination_country: string
+  end_use: string
+  end_user_type: string      // 民間企業/政府機関/軍/研究機関/個人 等
+  transaction_value: string  // 少額特例確認用（任意）
+}
+
+export interface JapanLicenseResult {
+  permit_required: boolean
+  applicable_exceptions: string[]   // 輸出令4条等
+  country_group: string             // グループA/B/C/D/E
+  reasoning: string
+}
+
+export interface UsEarLicenseResult {
+  license_required: boolean
+  country_group: string             // Country Group A/B/D/E
+  applicable_exceptions: string[]   // NLR, LVS, GBS, CIV, APP 等
+  reasoning: string
+}
+
+export interface LicenseResult {
+  status: LicenseStatus
+  japan_license: JapanLicenseResult
+  us_ear_license: UsEarLicenseResult
+  overall_assessment: string
+  missing_info_risks: string
+  next_actions: string[]
+  model_used: string
+  tokens_input: number
+  tokens_output: number
+}
+
 // ---- スクリーニング機能 ----
 
 export type ScreeningStatus = 'clear' | 'gray' | 'concern'

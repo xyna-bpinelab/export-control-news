@@ -222,6 +222,22 @@ export default function ClassificationPage() {
             </div>
           )}
 
+          {/* 許可判断へのリンク */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-700">次のステップ：輸出許可判断</p>
+              <p className="text-xs text-gray-500 mt-0.5">この該非判定結果をもとに、仕向地・用途を加えた許可判断を実行できます</p>
+            </div>
+            <a
+              href={`/license?eccn=${encodeURIComponent(result.us_ear.eccn)}&fefta=${encodeURIComponent(
+                result.japan_fefta.relevant_items.filter(i => i.applicable).map(i => i.item_number).join(', ') || '非該当'
+              )}`}
+              className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+            >
+              許可判断へ →
+            </a>
+          </div>
+
           <p className="text-xs text-gray-400 leading-relaxed">
             ※ 本判定はAIによる参考情報です。最終的な該非判定は輸出者の責任において行ってください。
             重要案件については、経済産業省またはメーカーの安全保障貿易担当部署へご相談ください。
