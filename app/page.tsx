@@ -16,19 +16,6 @@ async function getTopArticles(): Promise<Article[]> {
   return (data ?? []) as Article[]
 }
 
-async function getStats() {
-  const supabase = await createServerSupabaseClient()
-  const { count: total } = await supabase
-    .from('articles')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: highImpact } = await supabase
-    .from('summaries')
-    .select('*', { count: 'exact', head: true })
-    .eq('impact_level', 'high')
-
-  return { total: total ?? 0, highImpact: highImpact ?? 0 }
-}
 
 const FEATURES = [
   {
@@ -61,7 +48,7 @@ const FEATURES = [
   {
     href: '/articles',
     icon: '📰',
-    title: '最新情報',
+    title: '記事一覧',
     description: '経産省・外務省・BIS・OFAC等の政府機関から輸出管理の最新情報をAI要約付きで自動収集します。',
     badge: '自動更新',
     color: 'border-green-200 hover:border-green-400 hover:bg-green-50',
@@ -70,7 +57,7 @@ const FEATURES = [
 ]
 
 export default async function HomePage() {
-  const [articles, stats] = await Promise.all([getTopArticles(), getStats()])
+  const articles = await getTopArticles()
 
   return (
     <div className="space-y-10">
@@ -81,16 +68,6 @@ export default async function HomePage() {
           安全保障貿易管理（外為法・EAR）をAIでサポートします。
           該非判定から需要者スクリーニングまで、輸出コンプライアンス業務を効率化します。
         </p>
-        <div className="mt-4 flex gap-3 text-sm">
-          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center min-w-[100px]">
-            <div className="text-2xl font-bold text-gray-900">{stats.total.toLocaleString()}</div>
-            <div className="text-gray-500 text-xs mt-1">収集記事数</div>
-          </div>
-          <div className="bg-white rounded-lg border border-red-200 px-4 py-3 text-center min-w-[100px]">
-            <div className="text-2xl font-bold text-red-600">{stats.highImpact.toLocaleString()}</div>
-            <div className="text-gray-500 text-xs mt-1">要対応情報</div>
-          </div>
-        </div>
       </div>
 
       {/* 機能カード */}

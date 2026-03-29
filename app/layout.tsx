@@ -37,9 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </span>
             </a>
             <nav className="flex items-center gap-4 text-sm text-gray-600">
-              <a href="/articles" className="hover:text-gray-900 transition-colors">
-                記事一覧
-              </a>
               <a href="/classification" className="hover:text-gray-900 transition-colors">
                 該非判定
               </a>
@@ -48,6 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </a>
               <a href="/screening" className="hover:text-gray-900 transition-colors">
                 需要者スクリーニング
+              </a>
+              <a href="/articles" className="hover:text-gray-900 transition-colors">
+                記事一覧
               </a>
               <a href="/sources" className="hover:text-gray-900 transition-colors">
                 収集元機関
