@@ -47,7 +47,7 @@ export async function GET(req: Request) {
     try {
       const result = await generateSummary(article)
 
-      // summaries テーブルに保存
+      // summaries テーブルに保存（article_id を conflict target に指定して重複更新対応）
       const { error: summaryError } = await supabase.from('summaries').upsert({
         article_id: article.id,
         summary_ja: result.summary_ja,
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
         prompt_version: result.prompt_version,
         tokens_input: result.tokens_input,
         tokens_output: result.tokens_output,
-      })
+      }, { onConflict: 'article_id' })
 
       if (summaryError) throw new Error(summaryError.message)
 
