@@ -5,7 +5,7 @@ import type { ClassificationInput, ClassificationResult } from '@/types'
 
 const STATUS_CONFIG = {
   controlled: {
-    label: '規制対象（要許可申請）',
+    label: '規制対象',
     bg: 'bg-red-50',
     border: 'border-red-300',
     text: 'text-red-800',
@@ -21,7 +21,7 @@ const STATUS_CONFIG = {
     icon: '⚠️',
   },
   clear: {
-    label: '規制対象外（EAR99相当）',
+    label: '規制対象外（EAR99）',
     bg: 'bg-green-50',
     border: 'border-green-300',
     text: 'text-green-800',
@@ -35,8 +35,6 @@ export default function ClassificationPage() {
     product_name: '',
     description: '',
     specs: '',
-    destination_country: '',
-    end_use: '',
   })
   const [result, setResult] = useState<ClassificationResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -71,8 +69,8 @@ export default function ClassificationPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">該非判定</h1>
         <p className="text-sm text-gray-600">
-          製品・技術の輸出規制該非を判定します。日本の外為法（輸出令別表第1）および米国EAR（CCL/ECCN）に基づき、AIが判定を行います。
-          詳細なスペックを入力するほど精度が向上します。
+          製品・技術が輸出規制品目に該当するか判定します。日本の外為法（輸出令別表第1）および米国EAR（CCL/ECCN）に基づきAIが判定します。
+          仕向地・最終用途は問いません。スペックを詳しく入力するほど精度が向上します。
         </p>
       </div>
 
@@ -112,41 +110,14 @@ export default function ClassificationPage() {
           </label>
           <textarea
             rows={3}
-            placeholder="例: 周波数範囲: 100MHz〜6GHz、出力: +20dBm、位相雑音: -130dBc/Hz@1kHz、精度: ±0.1ppm"
+            placeholder="例: 周波数範囲: 100MHz〜40GHz、出力: +20dBm、位相雑音: -130dBc/Hz@1kHz"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={form.specs}
             onChange={e => setForm({ ...form, specs: e.target.value })}
           />
           <p className="mt-1 text-xs text-gray-400">
-            周波数・出力・精度・速度・温度範囲など規制閾値に関わるパラメータを入力すると精度が向上します
+            周波数・出力・精度・サンプリングレート等、規制閾値に関わるパラメータを入力してください
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              輸出先国
-            </label>
-            <input
-              type="text"
-              placeholder="例: 中国、UAE、インド"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={form.destination_country}
-              onChange={e => setForm({ ...form, destination_country: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              最終用途
-            </label>
-            <input
-              type="text"
-              placeholder="例: 民生用通信機器の研究開発"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={form.end_use}
-              onChange={e => setForm({ ...form, end_use: e.target.value })}
-            />
-          </div>
         </div>
 
         <button
@@ -170,11 +141,9 @@ export default function ClassificationPage() {
           <div className={`border rounded-lg p-5 ${cfg.bg} ${cfg.border}`}>
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl">{cfg.icon}</span>
-              <div>
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${cfg.badge}`}>
-                  {cfg.label}
-                </span>
-              </div>
+              <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${cfg.badge}`}>
+                {cfg.label}
+              </span>
             </div>
             <p className={`text-sm ${cfg.text} leading-relaxed`}>{result.overall_assessment}</p>
           </div>
@@ -182,46 +151,30 @@ export default function ClassificationPage() {
           {/* 外為法 */}
           <div className="bg-white border border-gray-200 rounded-lg p-5">
             <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="text-base">🇯🇵</span> 外為法（輸出令別表第1）
+              <span>🇯🇵</span> 外為法（輸出令別表第1 リスト規制）
             </h2>
-            <div className="flex flex-wrap gap-3 mb-3 text-sm">
-              <span className={`px-2 py-1 rounded-full font-medium ${result.japan_fefta.list_controlled ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            <div className="mb-3">
+              <span className={`inline-block px-2 py-1 rounded-full text-sm font-medium ${result.japan_fefta.list_controlled ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                 リスト規制: {result.japan_fefta.list_controlled ? '該当' : '非該当'}
-              </span>
-              <span className={`px-2 py-1 rounded-full font-medium ${result.japan_fefta.catchall_applicable ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>
-                キャッチオール: {result.japan_fefta.catchall_applicable ? '適用可能性あり' : '適用外'}
-              </span>
-              <span className={`px-2 py-1 rounded-full font-medium ${result.japan_fefta.license_required ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                許可申請: {result.japan_fefta.license_required ? '必要' : '不要'}
               </span>
             </div>
 
             {result.japan_fefta.relevant_items.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs font-medium text-gray-500 mb-2">関連項目の検討結果</p>
-                <div className="space-y-2">
-                  {result.japan_fefta.relevant_items.map((item, i) => (
-                    <div key={i} className={`border rounded-md p-3 text-xs ${item.applicable ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-gray-50'}`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`font-semibold ${item.applicable ? 'text-red-700' : 'text-gray-600'}`}>
-                          {item.applicable ? '◆ ' : '◇ '}{item.item_number}
-                        </span>
-                        <span className="text-gray-500">{item.category}</span>
-                        <span className={`ml-auto px-1.5 py-0.5 rounded text-xs font-medium ${item.applicable ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
-                          {item.applicable ? '該当可能性あり' : '非該当'}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 leading-relaxed">{item.reason}</p>
+              <div className="mb-3 space-y-2">
+                {result.japan_fefta.relevant_items.map((item, i) => (
+                  <div key={i} className={`border rounded-md p-3 text-xs ${item.applicable ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-gray-50'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`font-semibold ${item.applicable ? 'text-red-700' : 'text-gray-600'}`}>
+                        {item.applicable ? '◆ ' : '◇ '}{item.item_number}
+                      </span>
+                      <span className="text-gray-500">{item.category}</span>
+                      <span className={`ml-auto px-1.5 py-0.5 rounded font-medium ${item.applicable ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {item.applicable ? '該当可能性あり' : '非該当'}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {result.japan_fefta.catchall_applicable && (
-              <div className="mb-3 bg-orange-50 border border-orange-200 rounded-md p-3 text-xs text-orange-800">
-                <p className="font-medium mb-1">キャッチオール規制の根拠</p>
-                <p>{result.japan_fefta.catchall_reason}</p>
+                    <p className="text-gray-600 leading-relaxed">{item.reason}</p>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -233,17 +186,14 @@ export default function ClassificationPage() {
           {/* EAR */}
           <div className="bg-white border border-gray-200 rounded-lg p-5">
             <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="text-base">🇺🇸</span> 米国EAR（Commerce Control List）
+              <span>🇺🇸</span> 米国EAR（Commerce Control List）
             </h2>
-            <div className="flex flex-wrap gap-3 mb-3 text-sm">
-              <span className="px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
+            <div className="flex flex-wrap gap-3 mb-3">
+              <span className="px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
                 ECCN: <strong>{result.us_ear.eccn}</strong>
               </span>
-              <span className={`px-2 py-1 rounded-full font-medium ${result.us_ear.license_required ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                ライセンス: {result.us_ear.license_required ? '必要' : '不要（NLR）'}
-              </span>
               {result.us_ear.applicable_reasons.length > 0 && (
-                <span className="px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">
+                <span className="px-2 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">
                   規制理由: {result.us_ear.applicable_reasons.join(', ')}
                 </span>
               )}
@@ -253,9 +203,7 @@ export default function ClassificationPage() {
 
           {/* 残リスク */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <h2 className="font-semibold text-amber-800 mb-2 text-sm flex items-center gap-1">
-              <span>⚠️</span> 情報不足による残リスク
-            </h2>
+            <h2 className="font-semibold text-amber-800 mb-2 text-sm">⚠️ 情報不足による残リスク</h2>
             <p className="text-xs text-amber-700 leading-relaxed">{result.missing_info_risks}</p>
           </div>
 
@@ -274,7 +222,6 @@ export default function ClassificationPage() {
             </div>
           )}
 
-          {/* Disclaimer */}
           <p className="text-xs text-gray-400 leading-relaxed">
             ※ 本判定はAIによる参考情報です。最終的な該非判定は輸出者の責任において行ってください。
             重要案件については、経済産業省またはメーカーの安全保障貿易担当部署へご相談ください。

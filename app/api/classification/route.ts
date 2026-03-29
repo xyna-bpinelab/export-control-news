@@ -23,8 +23,6 @@ export async function POST(req: Request) {
     product_name: input.product_name ?? '',
     description: input.description ?? '',
     specs: input.specs ?? '',
-    destination_country: input.destination_country ?? '',
-    end_use: input.end_use ?? '',
   }
 
   try {

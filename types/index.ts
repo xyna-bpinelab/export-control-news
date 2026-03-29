@@ -92,11 +92,9 @@ export interface SummaryResult {
 export type ClassificationStatus = 'controlled' | 'gray' | 'clear'
 
 export interface ClassificationInput {
-  product_name: string        // 品名・型番
-  description: string         // 用途・機能説明
-  specs: string               // 主要仕様・パラメータ
-  destination_country: string // 輸出先国
-  end_use: string             // 最終用途
+  product_name: string  // 品名・型番
+  description: string   // 用途・機能説明
+  specs: string         // 主要仕様・パラメータ
 }
 
 export interface FeftaListItem {
@@ -109,9 +107,6 @@ export interface FeftaListItem {
 export interface FeftaResult {
   list_controlled: boolean
   relevant_items: FeftaListItem[]
-  catchall_applicable: boolean
-  catchall_reason: string
-  license_required: boolean
   reasoning: string
 }
 
