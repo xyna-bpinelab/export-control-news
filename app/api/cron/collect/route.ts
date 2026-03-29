@@ -4,7 +4,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 import { collectFromSource } from '@/lib/collectors'
 import type { Source } from '@/types'
 
-export const maxDuration = 60 // Vercel Pro: 60秒
+export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
