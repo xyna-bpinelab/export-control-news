@@ -86,3 +86,39 @@ export interface SummaryResult {
   related_laws: string[]
   title_ja?: string
 }
+
+// ---- スクリーニング機能 ----
+
+export type ScreeningStatus = 'clear' | 'gray' | 'concern'
+
+export interface ScreeningInput {
+  customer_name: string
+  country: string
+  business_description: string
+  product: string
+}
+
+export interface MatchedOrganization {
+  name_on_list: string
+  location: string
+  concern_categories: string[]
+  list_name: string
+  similarity_reason: string
+}
+
+export interface CheckedList {
+  name: string
+  result: 'no_match' | 'match' | 'similar'
+}
+
+export interface ScreeningResult {
+  status: ScreeningStatus
+  matched_organizations: MatchedOrganization[]
+  checked_lists: CheckedList[]
+  reasoning: string
+  missing_info_risks: string
+  next_actions: string[]
+  model_used: string
+  tokens_input: number
+  tokens_output: number
+}
