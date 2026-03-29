@@ -8,7 +8,9 @@ const MAX_TOKENS = 2048
 
 const LIST_SOURCE_LABELS: Record<string, string> = {
   bis_entity_list: '米国BIS エンティティリスト',
+  bis_dpl: '米国BIS 輸出特権剥奪者リスト（DPL）',
   foreign_user_list: '経済産業省 外国ユーザーリスト',
+  ofac_sdn: '米国OFAC SDNリスト',
 }
 
 function formatDbMatches(matches: ListSearchResult[]): string {
