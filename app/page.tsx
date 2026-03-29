@@ -63,10 +63,8 @@ export default async function HomePage() {
     <div className="space-y-10">
       {/* ヒーロー */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">輸出管理情報ポータル</h1>
-        <p className="text-gray-500 text-sm max-w-2xl">
-          安全保障貿易管理（外為法・EAR）をAIでサポートします。
-          該非判定から需要者スクリーニングまで、輸出コンプライアンス業務を効率化します。
+        <p className="text-gray-500 text-sm">
+          安全保障貿易管理（外為法・EAR）をAIでサポートします。該非判定から需要者スクリーニングまで、輸出コンプライアンス業務を効率化します。
         </p>
       </div>
 

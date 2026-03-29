@@ -12,6 +12,42 @@ const MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash-lite'
 const MAX_TOKENS = 4096
 
 function buildPrompt(input: LicenseInput): string {
+  const earSection = input.has_us_content ? `
+### 米国 EAR：仕向地カントリーグループ
+- **Country Group A**: 同盟国（A:1〜A:6の細分類あり）
+  - A:5/A:6: 英国・オーストラリア等（AUKUS・最優遇）
+- **Country Group B**: 一般（EAR規制に服するが比較的緩い）
+- **Country Group D**: 懸念国
+  - D:1（武器禁輸）: ロシア・ベラルーシ・中国・ベネズエラ等
+  - D:2（核）: イラン・北朝鮮等
+  - D:4（ミサイル技術）: イラン・北朝鮮・シリア等
+- **Country Group E**: 禁輸対象（E:1 テロ支援国: キューバ・イラン・北朝鮮・シリア、E:2: ロシア・ベラルーシ）
+
+### 米国 EAR：主要ライセンス例外
+- **NLR（No License Required）**: EAR99またはカントリーグループA向け等
+- **LVS（Low Value Shipment）**: 少額貨物
+- **CIV（Civil End Users）**: 民間最終用途・最終需要者向け
+- **ENC（Encryption）**: 暗号品目（5A002等）の民間向け輸出
+- **STA（Strategic Trade Authorization）**: 同盟国向け戦略物資
+- **禁止（Prohibited）**: E:1国向け規制品等は原則ライセンス例外不可
+
+### EAR End-Use/End-User規制
+- 核・生化学兵器・ミサイル開発用途：明確な禁止（Part 744）
+- Entity List掲載者への輸出：ライセンス必要（原則不承認）
+- 軍需エンドユーザー（MEU）規制：中国・ロシア等の軍需企業向け` : ''
+
+  const earOutputSection = input.has_us_content ? `  "us_ear_license": {
+    "license_required": true または false,
+    "country_group": "Country Group A/B/D:1/D:2/E:1等",
+    "applicable_exceptions": ["NLR", "ENC" 等、適用可能なライセンス例外（なければ[]）],
+    "reasoning": "EARにおける許可要否の判断根拠"
+  },` : `  "us_ear_license": {
+    "license_required": false,
+    "country_group": "N/A",
+    "applicable_exceptions": [],
+    "reasoning": "米国成分なし。EARの適用対象外。"
+  },`
+
   return `あなたは、日本の外為法および米国EARに精通した輸出管理の専門家です。
 以下の製品分類・取引情報をもとに、**輸出許可判断**を行ってください。
 
@@ -19,7 +55,8 @@ function buildPrompt(input: LicenseInput): string {
 
 ## 取引情報
 
-- ECCN（米国EAR分類）: ${input.eccn || '（未入力）'}
+- 米国成分の有無: ${input.has_us_content ? 'あり（EAR対象）' : 'なし（EAR非対象）'}
+- ECCN（米国EAR分類）: ${input.has_us_content ? (input.eccn || '（未入力）') : 'N/A'}
 - 外為法 該当項目: ${input.japan_fefta_item || '（未入力・非該当）'}
 - 仕向地国: ${input.destination_country || '（未入力）'}
 - 最終用途: ${input.end_use || '（未入力）'}
@@ -50,33 +87,7 @@ function buildPrompt(input: LicenseInput): string {
 - グループD向け輸出で、WMD・通常兵器用途が懸念される場合は非リスト品でも許可必要
 - 外国ユーザーリスト掲載組織への輸出は特に注意
 
-### 米国 EAR：仕向地カントリーグループ
-- **Country Group A**: 同盟国（A:1〜A:6の細分類あり）
-  - A:5/A:6: 英国・オーストラリア等（AUKUS・最優遇）
-- **Country Group B**: 一般（EAR規制に服するが比較的緩い）
-- **Country Group D**: 懸念国
-  - D:1（武器禁輸）: ロシア・ベラルーシ・中国・ベネズエラ等
-  - D:2（核）: イラン・北朝鮮等
-  - D:3（生化学兵器）
-  - D:4（ミサイル技術）: イラン・北朝鮮・シリア等
-  - D:5（国家安全保障）
-- **Country Group E**: 禁輸対象（E:1 テロ支援国: キューバ・イラン・北朝鮮・シリア、E:2: ロシア・ベラルーシ）
-
-### 米国 EAR：主要ライセンス例外
-- **NLR（No License Required）**: EAR99またはカントリーグループA向け等、ライセンス不要
-- **LVS（Low Value Shipment）**: 少額貨物
-- **GBS（Shipments to Group B Countries）**: グループB向け一部品目
-- **CIV（Civil End Users）**: 民間最終用途・最終需要者向け
-- **APP（Computers）**: コンピュータ関連
-- **ENC（Encryption）**: 暗号品目（5A002等）の民間向け輸出
-- **STA（Strategic Trade Authorization）**: 同盟国向け戦略物資
-- **禁止（Prohibited）**: E:1国向け規制品等は原則ライセンス例外不可
-
-### EAR End-Use/End-User規制
-- 核・生化学兵器・ミサイル開発用途：明確な禁止（Part 744）
-- Entity List掲載者への輸出：ライセンス必要（原則不承認）
-- 軍需エンドユーザー（MEU）規制：中国・ロシア等の軍需企業向け
-- 「Red Flags」：疑わしい取引への注意義務
+${earSection}
 
 ## 出力形式（JSONのみ、説明文不要）
 
@@ -88,13 +99,8 @@ function buildPrompt(input: LicenseInput): string {
     "country_group": "グループA/B/C/D/E",
     "reasoning": "外為法における許可要否の判断根拠（仕向地グループ・該当項目・例外適用可否を含む）"
   },
-  "us_ear_license": {
-    "license_required": true または false,
-    "country_group": "Country Group A/B/D:1/D:2/E:1等",
-    "applicable_exceptions": ["NLR", "ENC" 等、適用可能なライセンス例外（なければ[]）],
-    "reasoning": "EARにおける許可要否の判断根拠（ECCNの規制理由・カントリーグループ・例外適用可否を含む）"
-  },
-  "overall_assessment": "日本・米国両規制を踏まえた総合的な許可判断",
+  ${earOutputSection}
+  "overall_assessment": "${input.has_us_content ? '日本・米国両規制を踏まえた総合的な許可判断' : '日本外為法の観点での許可判断（米国成分なしのためEARは対象外）'}",
   "missing_info_risks": "未入力情報により現時点で確定できないリスク（必ず記述）",
   "next_actions": [
     "次に確認・実施すべき具体的なアクション"
@@ -111,7 +117,7 @@ function buildPrompt(input: LicenseInput): string {
 ## 注意事項
 - JSONのみを出力し、余計な説明文は含めないこと
 - 仕向地が不明な場合は最もリスクの高いシナリオを想定して gray または permit_required とすること
-- EAR99であってもEARR End-Use規制（Part 744）・制裁規制には服することを考慮すること
+${input.has_us_content ? '- EAR99であってもEAR End-Use規制（Part 744）・制裁規制には服することを考慮すること' : '- 米国成分なしのため us_ear_license は上記の固定値をそのまま出力すること'}
 - missing_info_risksは「特になし」不可。必ず記述すること`
 }
 

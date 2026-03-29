@@ -134,7 +134,8 @@ export interface ClassificationResult {
 export type LicenseStatus = 'permit_required' | 'exception_applicable' | 'no_permit_required' | 'prohibited' | 'gray'
 
 export interface LicenseInput {
-  eccn: string               // ECCN or "EAR99"
+  has_us_content: boolean    // 米国成分の有無
+  eccn: string               // ECCN or "EAR99"（米国成分ありの場合のみ）
   japan_fefta_item: string   // "別表第1 第9項" or "非該当"
   destination_country: string
   end_use: string

@@ -4,7 +4,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 import { generateSummary } from '@/lib/ai/summarizer'
 import type { Article } from '@/types'
 
-export const maxDuration = 60
+export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
 const BATCH_SIZE = parseInt(process.env.SUMMARIZE_BATCH_SIZE ?? '10', 10)

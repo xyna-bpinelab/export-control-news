@@ -60,6 +60,7 @@ const END_USER_TYPES = [
 function LicensePage() {
   const searchParams = useSearchParams()
   const [form, setForm] = useState<LicenseInput>({
+    has_us_content: true,
     eccn: '',
     japan_fefta_item: '',
     destination_country: '',
@@ -127,23 +128,52 @@ function LicensePage() {
 
       <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 mb-6 space-y-5">
 
+        {/* 米国成分の有無 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">米国成分（EAR対象）</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="has_us_content"
+                checked={form.has_us_content}
+                onChange={() => setForm({ ...form, has_us_content: true })}
+                className="accent-blue-600"
+              />
+              <span className="text-sm text-gray-700">あり（米国原産の部品・技術を含む）</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="has_us_content"
+                checked={!form.has_us_content}
+                onChange={() => setForm({ ...form, has_us_content: false, eccn: '' })}
+                className="accent-blue-600"
+              />
+              <span className="text-sm text-gray-700">なし（EAR非対象）</span>
+            </label>
+          </div>
+        </div>
+
         {/* 製品分類（該非判定からの引き継ぎ） */}
         <div className="border border-gray-100 rounded-md p-4 bg-gray-50 space-y-3">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">製品分類（該非判定結果）</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                ECCN
-              </label>
-              <input
-                type="text"
-                placeholder="例: 5A002.a.1 / EAR99"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                value={form.eccn}
-                onChange={e => setForm({ ...form, eccn: e.target.value })}
-              />
-            </div>
-            <div>
+            {form.has_us_content && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  ECCN
+                </label>
+                <input
+                  type="text"
+                  placeholder="例: 5A002.a.1 / EAR99"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={form.eccn}
+                  onChange={e => setForm({ ...form, eccn: e.target.value })}
+                />
+              </div>
+            )}
+            <div className={form.has_us_content ? '' : 'sm:col-span-2'}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 外為法 該当項目
               </label>
@@ -276,6 +306,12 @@ function LicensePage() {
           </div>
 
           {/* EAR */}
+          {result.us_ear_license.country_group === 'N/A' ? (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-500 flex items-center gap-2">
+              <span>🇺🇸</span>
+              <span>米国成分なし — EARの適用対象外です。</span>
+            </div>
+          ) : (
           <div className="bg-white border border-gray-200 rounded-lg p-5">
             <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span>🇺🇸</span> 米国EAR ライセンス判断
@@ -304,6 +340,7 @@ function LicensePage() {
               {result.us_ear_license.reasoning}
             </p>
           </div>
+          )}
 
           {/* 残リスク */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">

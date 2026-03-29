@@ -20,6 +20,7 @@ export async function POST(req: Request) {
   }
 
   const licenseInput: LicenseInput = {
+    has_us_content: input.has_us_content ?? true,
     eccn: input.eccn ?? '',
     japan_fefta_item: input.japan_fefta_item ?? '',
     destination_country: input.destination_country ?? '',

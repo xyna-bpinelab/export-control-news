@@ -3,6 +3,7 @@ name: Hourly Cron Jobs
 on:
   schedule:
     - cron: '0 * * * *'   # 毎時 :00 — 収集
+    - cron: '15 * * * *'  # 毎時 :15 — 要約（収集完了後）
   workflow_dispatch:
     inputs:
       job:
@@ -22,16 +23,17 @@ jobs:
         run: |
           curl -f -X GET "${{ secrets.VERCEL_URL }}/api/cron/collect" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            --max-time 60
+            --max-time 120
 
   summarize:
     name: Summarize Articles
     runs-on: ubuntu-latest
     if: >
-      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'summarize' || github.event.inputs.job == 'both')
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'summarize' || github.event.inputs.job == 'both') ||
+      github.event_name == 'schedule' && startsWith(github.event.schedule, '15 ')
     steps:
       - name: Call /api/cron/summarize
         run: |
           curl -f -X GET "${{ secrets.VERCEL_URL }}/api/cron/summarize" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            --max-time 60
+            --max-time 290

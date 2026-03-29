@@ -37,6 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </span>
             </a>
             <nav className="flex items-center gap-4 text-sm text-gray-600">
+              <a href="/" className="hover:text-gray-900 transition-colors">
+                トップ
+              </a>
               <a href="/classification" className="hover:text-gray-900 transition-colors">
                 該非判定
               </a>
