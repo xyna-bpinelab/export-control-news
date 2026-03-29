@@ -40,6 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/articles" className="hover:text-gray-900 transition-colors">
                 記事一覧
               </a>
+              <a href="/classification" className="hover:text-gray-900 transition-colors">
+                該非判定
+              </a>
               <a href="/screening" className="hover:text-gray-900 transition-colors">
                 需要者スクリーニング
               </a>
