@@ -1,5 +1,5 @@
 import type { Article } from '@/types'
-import { formatRelativeTime } from '@/lib/utils/date'
+import { formatDateJST } from '@/lib/utils/date'
 
 const COUNTRY_FLAG: Record<string, string> = {
   JP: '🇯🇵',
@@ -56,7 +56,7 @@ export function ArticleCard({ article }: Props) {
           </span>
         )}
         <span className="ml-auto text-xs text-gray-400">
-          {formatRelativeTime(article.published_at ?? article.collected_at)}
+          {formatDateJST(article.published_at ?? article.collected_at)}
         </span>
       </div>
 
