@@ -5,6 +5,7 @@ import { MetiScraper } from './sources/meti'
 import { MofaScraper } from './sources/mofa'
 import { CistecScraper } from './sources/cistec'
 import { OfacScraper } from './sources/ofac'
+import { BisScraper } from './sources/bis'
 import { deduplicateItems } from './dedup'
 
 const SCRAPERS: Record<string, { scrape: (url: string) => Promise<CollectedItem[]> }> = {
@@ -12,6 +13,7 @@ const SCRAPERS: Record<string, { scrape: (url: string) => Promise<CollectedItem[
   mofa: new MofaScraper(),
   cistec: new CistecScraper(),
   ofac: new OfacScraper(),
+  bis: new BisScraper(),
 }
 
 export interface CollectResult {
