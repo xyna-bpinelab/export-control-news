@@ -68,7 +68,11 @@ export async function GET(req: Request) {
         updateData.title_ja = result.title_ja
       }
 
-      await supabase.from('articles').update(updateData).eq('id', article.id)
+      const { error: updateError } = await supabase
+        .from('articles')
+        .update(updateData)
+        .eq('id', article.id)
+      if (updateError) throw new Error(updateError.message)
 
       processed++
     } catch (err) {
