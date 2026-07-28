@@ -35,9 +35,9 @@ INSERT INTO sources (slug, name_ja, name_en, country_code, base_url, collector_t
     'Office of Foreign Assets Control',
     'US',
     'https://ofac.treasury.gov',
-    'rss',
-    'https://ofac.treasury.gov/recent-actions/rss',
-    NULL
+    'scraper',
+    NULL,
+    'https://ofac.treasury.gov/recent-actions'
   ),
   (
     'eu-commission',
@@ -46,7 +46,7 @@ INSERT INTO sources (slug, name_ja, name_en, country_code, base_url, collector_t
     'EU',
     'https://policy.trade.ec.europa.eu',
     'rss',
-    'https://eur-lex.europa.eu/tools/rss.do?other=&type=qdrSimple&qid=1&locale=en',
+    'https://policy.trade.ec.europa.eu/node/2/rss_en',
     NULL
   ),
   (
@@ -57,5 +57,5 @@ INSERT INTO sources (slug, name_ja, name_en, country_code, base_url, collector_t
     'https://www.cistec.or.jp',
     'scraper',
     NULL,
-    'https://www.cistec.or.jp/service/export_information/index.html'
+    'https://www.cistec.or.jp/'
   );

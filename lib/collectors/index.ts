@@ -4,12 +4,14 @@ import { fetchRssFeed } from './rss'
 import { MetiScraper } from './sources/meti'
 import { MofaScraper } from './sources/mofa'
 import { CistecScraper } from './sources/cistec'
+import { OfacScraper } from './sources/ofac'
 import { deduplicateItems } from './dedup'
 
 const SCRAPERS: Record<string, { scrape: (url: string) => Promise<CollectedItem[]> }> = {
   meti: new MetiScraper(),
   mofa: new MofaScraper(),
   cistec: new CistecScraper(),
+  ofac: new OfacScraper(),
 }
 
 export interface CollectResult {

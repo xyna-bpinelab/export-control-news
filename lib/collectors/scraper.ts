@@ -22,7 +22,8 @@ export async function fetchHtml(url: string): Promise<{ $: cheerio.CheerioAPI; h
 
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'ExportControlNewsBot/1.0 (+https://export-control-news.vercel.app)',
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml',
       'Accept-Language': 'ja,en;q=0.9',
     },
@@ -47,7 +48,12 @@ export async function fetchHtml(url: string): Promise<{ $: cheerio.CheerioAPI; h
     // meta タグから charset を再検出（Shift-JIS で UTF-8 と宣言している場合等）
     if (html.includes('charset=shift_jis') || html.includes('charset=Shift_JIS')) {
       // 再取得
-      const res2 = await fetch(url, { headers: { 'User-Agent': 'ExportControlNewsBot/1.0' } })
+      const res2 = await fetch(url, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      })
       const buf = Buffer.from(await res2.arrayBuffer())
       html = iconv.decode(buf, 'Shift_JIS')
     }

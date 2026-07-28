@@ -5,13 +5,22 @@ import { cleanText } from '@/lib/utils/text'
 
 const BASE_URL = 'https://www.cistec.or.jp'
 
+// トップページの「What's New」テーブル（tr.tableWhatNew、日付は YY/MM/DD）を解析する。
+// 旧 export_information ページは廃止されたため、トップページを対象とする。
+function parseCistecDate(text: string): Date | null {
+  const m = text.trim().match(/^(\d{2})\/(\d{2})\/(\d{2})$/)
+  if (!m) return parseFlexibleDate(text)
+  const [, yy, mm, dd] = m
+  return new Date(`20${yy}-${mm}-${dd}`)
+}
+
 export class CistecScraper extends BaseScraper {
   extract($: CheerioAPI, _baseUrl: string): ScrapedItem[] {
     const items: ScrapedItem[] = []
 
-    $('ul li, dl dd, .news-item').each((_, el) => {
-      const $el = $(el)
-      const $link = $el.find('a').first()
+    $('tr.tableWhatNew').each((_, el) => {
+      const $tds = $(el).find('td')
+      const $link = $tds.eq(1).find('a').first()
       const href = $link.attr('href')
       if (!href) return
 
@@ -22,9 +31,7 @@ export class CistecScraper extends BaseScraper {
       const title = cleanText($link.text())
       if (!title || title.length < 5) return
 
-      const dateText = $el.find('.date, time').first().text()
-        || $el.text().slice(0, 20)
-      const published_at = parseFlexibleDate(dateText)
+      const published_at = parseCistecDate($tds.eq(0).text())
 
       items.push({
         title,
