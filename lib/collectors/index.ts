@@ -68,7 +68,10 @@ export async function collectFromSource(
       status: 'collected',
     }))
 
-    const { error } = await supabase.from('articles').insert(rows)
+    const { error } = await supabase.from('articles').upsert(rows, {
+      onConflict: 'url_hash',
+      ignoreDuplicates: true,
+    })
     if (error) throw new Error(error.message)
 
     base.inserted = newItems.length
